@@ -1,13 +1,13 @@
-import {app, BrowserWindow, screen} from 'electron';
-import * as path from 'path';
+import { BrowserWindow, app, ipcMain, screen } from 'electron';
 import * as fs from 'fs';
+import { getKeyMap, onDidChangeKeyboardLayout } from 'native-keymap';
+import * as path from 'path';
 
 let win: BrowserWindow | null = null;
 const args = process.argv.slice(1),
-  serve = args.some(val => val === '--serve');
+  serve = args.some((val) => val === '--serve');
 
 function createWindow(): BrowserWindow {
-
   const size = screen.getPrimaryDisplay().workAreaSize;
 
   // Create the browser window.
@@ -18,9 +18,46 @@ function createWindow(): BrowserWindow {
     height: size.height,
     webPreferences: {
       nodeIntegration: true,
-      allowRunningInsecureContent: (serve),
+      allowRunningInsecureContent: serve,
       contextIsolation: false,
     },
+  });
+
+  win.webContents.session.on(
+    'select-serial-port',
+    (event, portList, webContents, callback) => {
+      win?.webContents.session.on('serial-port-added', (event, port) => {
+        console.log('serial-port-added FIRED WITH', port);
+      });
+      win?.webContents.session.on('serial-port-removed', (event, port) => {
+        console.log('serial-port-removed FIRED WITH', port);
+      });
+      event.preventDefault();
+      if (portList && portList.length > 0) {
+        callback(
+          portList.find((p) => p.displayName === 'CharaChorder 1')?.portId || ''
+        );
+      } else {
+        callback('');
+      }
+    }
+  );
+
+  win.webContents.session.setPermissionCheckHandler(
+    (webContents, permission, requestingOrigin, details) => {
+      if (permission === 'serial') {
+        return true;
+      }
+      return false;
+    }
+  );
+
+  win.webContents.session.setDevicePermissionHandler((details) => {
+    if (details.deviceType === 'serial') {
+      return true;
+    }
+
+    return false;
   });
 
   if (serve) {
@@ -34,7 +71,7 @@ function createWindow(): BrowserWindow {
     let pathIndex = './index.html';
 
     if (fs.existsSync(path.join(__dirname, '../dist/index.html'))) {
-       // Path when running electron in local folder
+      // Path when running electron in local folder
       pathIndex = '../dist/index.html';
     }
 
@@ -76,8 +113,18 @@ try {
       createWindow();
     }
   });
-
 } catch (e) {
   // Catch Error
   // throw e;
 }
+
+ipcMain.handle('get-native-keymap', async () => {
+  return getKeyMap();
+});
+
+onDidChangeKeyboardLayout(() => {
+  console.log('c!');
+  if (win) {
+    win.webContents.send('keyboard-layout-change');
+  }
+});

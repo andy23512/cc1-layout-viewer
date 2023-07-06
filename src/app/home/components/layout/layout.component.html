@@ -1,0 +1,10 @@
+<ng-container *ngFor="let side of sides">
+  <app-switch
+    *ngFor="let switch of switches"
+    style.grid-area="{{ side }}-{{ switch | camelToKebab }}"
+    [ngClass]="[side, switch | camelToKebab]"
+    [d]="layout[side]?.[switch] || {}"
+    [highlightedKeys]="highlightedKeys"
+    [style.opacity]="fadeSwitches.includes(switch) ? 0.3 : null"
+  ></app-switch>
+</ng-container>

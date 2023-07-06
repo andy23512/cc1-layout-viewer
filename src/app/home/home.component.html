@@ -1,7 +1,19 @@
-<div class="container">
-  <h1 class="title">
-    {{ 'PAGES.HOME.TITLE' | translate }}
-  </h1>
-
-  <a routerLink="/detail">{{ 'PAGES.HOME.GO_TO_DETAIL' | translate }}</a>
-</div>
+<button (click)="getKeyMaps()">Get CC1 Key Maps</button>&nbsp;&nbsp;&nbsp;
+<label for="layer-select">Layer:</label>
+<select id="layer-select" [(ngModel)]="selectedLayerCode">
+  <option *ngFor="let layer of layers" [value]="layer.code">
+    {{ layer.name }}
+  </option></select
+>&nbsp;&nbsp;&nbsp;
+<label for="modifier-select">Modifier:</label>
+<select id="modifier-select" [(ngModel)]="selectedModifierKey">
+  <option *ngFor="let m of modifiers" [value]="m.key">
+    {{ m.name }}
+  </option></select
+>&nbsp;&nbsp;&nbsp;
+<app-layout-viewer
+  [keyMaps]="keyMaps"
+  [systemKeyboardMap]="systemKeyboardMap"
+  [layerCode]="selectedLayerCode"
+  [modifierKey]="selectedModifierKey"
+></app-layout-viewer>
