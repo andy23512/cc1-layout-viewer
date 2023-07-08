@@ -21,9 +21,16 @@ export class KeyMapService {
         if (count === 270) {
           subject.next(rawData);
           subject.complete();
-          serial.close(() => {
-            console.log('closed');
-          });
+          serial
+            .close(() => {
+              console.log('closed');
+            })
+            .catch((error) => {
+              console.error(
+                'Error happened while closing serial connection: ',
+                error
+              );
+            });
         }
       }
       const serial = new NgxSerial(dataHandler, {
@@ -37,7 +44,9 @@ export class KeyMapService {
           await serial.sendData(`VAR B3 A${i} ${j}\r\n`);
         }
       }
-    })();
+    })().catch((error) => {
+      console.error('Error happened while getting key map: ', error);
+    });
     return subject.asObservable().pipe(
       map((rawData) => {
         return rawData
