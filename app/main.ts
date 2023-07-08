@@ -123,7 +123,6 @@ ipcMain.handle('get-native-keymap', async () => {
 });
 
 onDidChangeKeyboardLayout(() => {
-  console.log('c!');
   if (win) {
     win.webContents.send('keyboard-layout-change');
   }
