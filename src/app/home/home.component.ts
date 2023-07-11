@@ -50,6 +50,7 @@ export class HomeComponent implements OnInit {
   public getKeyMaps() {
     this.keyMapService.getKeyMaps().subscribe((keyMaps) => {
       this.keyMaps = keyMaps;
+      this.changeDetectorRef.detectChanges();
     });
   }
 
@@ -57,6 +58,7 @@ export class HomeComponent implements OnInit {
     const result = await this.electronService.ipcRenderer.invoke(
       'get-native-keymap'
     );
+    console.log('OS KeyMap', result);
     this.systemKeyboardMap = result;
   }
 }
